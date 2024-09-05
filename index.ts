@@ -7,60 +7,71 @@ const processDrillData = inngest.createFunction(
   { name: "Process Drill Data", id: "process-drill-data" },
   { event: "drill/process.data" },
   async ({ event, step }) => {
-    // Destructure the input data from the event
-    const {
-      workflow_id,
-      drill_id,
-      drill_name,
-      trial_details,
-      input_video_path,
-      output_video_path,
-      csv_files,
-      expected_metrics,
-      player_info,
-      sensitive,
-    } = event.data;
+    try {
+      // Log that the function was triggered
+      console.log("Function 'processDrillData' triggered.");
+      console.log("Event data received:", JSON.stringify(event));
 
-    // Simulate some processing with sleep and log the received data
-    await step.sleep("processing-delay", "2s");
+      // Destructure the input data from the event
+      const {
+        workflow_id,
+        drill_id,
+        drill_name,
+        trial_details,
+        input_video_path,
+        output_video_path,
+        csv_files,
+        expected_metrics,
+        player_info,
+        sensitive,
+      } = event.data;
 
-    console.log("Processing Workflow ID:", workflow_id);
-    console.log("Processing Drill ID:", drill_id);
-    console.log("Trial Details:", trial_details);
-    console.log("Input Video Path:", input_video_path);
-    console.log("CSV Files:", csv_files);
-    console.log("Expected Metrics:", expected_metrics);
-    console.log("Player Info:", player_info);
+      // Log the received data for debugging
+      console.log("Processing Workflow ID:", workflow_id);
+      console.log("Processing Drill ID:", drill_id);
+      console.log("Trial Details:", trial_details);
+      console.log("Input Video Path:", input_video_path);
+      console.log("CSV Files:", csv_files);
+      console.log("Expected Metrics:", expected_metrics);
+      console.log("Player Info:", player_info);
 
-    // Example: Generate mock metrics based on input
-    const metrics = expected_metrics.map(metric => ({
-      name: metric,
-      value: Math.random().toFixed(2), // Simulate metric value generation
-    }));
+      // Simulate some processing with sleep
+      await step.sleep("processing-delay", "2s");
 
-    // Example: Generate mock scores (assuming scores are calculated based on player information)
-    const scores = [
-      { name: "Player Skill", value: Math.floor(Math.random() * 100) },  // Simulate skill score
-      { name: "Player Fitness", value: Math.floor(Math.random() * 100) } // Simulate fitness score
-    ];
+      // Example: Generate mock metrics based on input
+      const metrics = expected_metrics.map((metric: string) => ({
+        name: metric,
+        value: Math.random().toFixed(2), // Simulate metric value generation
+      }));
 
-    // Prepare the output
-    const output = {
-      workflow_id,
-      video_path: output_video_path || input_video_path, // Default to input video path if output is not provided
-      metrics: JSON.stringify(metrics), // JSON string representation of metrics
-      scores: JSON.stringify(scores) // JSON string representation of scores
-    };
+      // Example: Generate mock scores
+      const scores = [
+        { name: "Player Skill", value: Math.floor(Math.random() * 100) },  // Simulate skill score
+        { name: "Player Fitness", value: Math.floor(Math.random() * 100) } // Simulate fitness score
+      ];
 
-    // Log output for debugging
-    console.log("Generated Output for Workflow:", output);
+      // Prepare the output
+      const output = {
+        workflow_id,
+        video_path: output_video_path || input_video_path, // Default to input video path if output is not provided
+        metrics: JSON.stringify(metrics), // JSON string representation of metrics
+        scores: JSON.stringify(scores) // JSON string representation of scores
+      };
 
-    // Return the final output
-    return output;
+      // Log output for debugging
+      console.log("Generated Output for Workflow:", JSON.stringify(output, null, 2));
+
+      // Return the final output
+      return output;
+    } catch (err) {
+      console.error("Error processing drill data:", err);
+      throw err; // Rethrow the error so it gets logged
+    }
   }
 );
 
-// Set INNGEST_BASE_URL=http://host.docker.internal:8288 for local dev within Docker
+// Log that the Inngest handler is starting
+console.log("Starting Inngest handler...");
 export const handler = serve({
   client: inngest,
   functions: [processDrillData],

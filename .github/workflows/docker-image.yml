@@ -3,7 +3,7 @@ name: Build and Push Docker Image to ECR and Update Lambda
 on:
   push:
     branches:
-      - main
+      - main#
 
 jobs:
   deploy:

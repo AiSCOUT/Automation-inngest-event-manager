@@ -1,0 +1,39 @@
+{
+  "name": "drill/process.data",
+  "data": {
+    "workflow_id": "workflow-123",
+    "drill_id": "drill-001",
+    "drill_name": "example_drill",
+    "trial_details": {
+      "club_name": "Test Club",
+      "club_id": "club-001",
+      "trial_name": "Test Trial",
+      "trial_id": "trial-001"
+    },
+    "input_video_path": "s3://example-bucket/input.mp4",
+    "output_video_path": "s3://example-bucket/output.mp4",
+    "csv_files": ["s3://example-bucket/cam_1_overlay.csv"],
+    "expected_metrics": ["speed", "accuracy"],
+    "player_info": {
+      "player_id": "player-123",
+      "player_age": 24,
+      "player_gender": "male",
+      "player_strong_foot": "right",
+      "player_position": "forward",
+      "player_height": 1.80,
+      "player_weight": 75,
+      "player_location": "New York"
+    },
+    "sensitive": {
+      "player_info": {
+        "player_email": "player@example.com",
+        "player_name": "John Doe",
+        "player_lat_long": {
+          "lat": "40.7128",
+          "long": "-74.0060"
+        },
+        "player_postcode": "10001"
+      }
+    }
+  }
+}
