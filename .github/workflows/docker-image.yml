@@ -1,0 +1,52 @@
+name: Build and Push Docker Image to ECR and Update Lambda
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup .netrc for GitHub authentication
+        env:
+          GH_ACCESS_TOKEN: ${{ secrets.GH_PRIVATE_ACCESS_TOKEN }}
+        run: |
+          echo "machine github.com" >> ~/.netrc
+          echo "login $GH_ACCESS_TOKEN" >> ~/.netrc
+          echo "password x-oauth-basic" >> ~/.netrc
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      # Configure AWS credentials for the entire session (ECR login will use these)
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+
+      # Login to ECR using the configured AWS credentials
+      - name: Login to AWS ECR
+        run: |
+          aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin 944727373196.dkr.ecr.eu-west-2.amazonaws.com
+
+      # Build, tag, and push Docker image to ECR
+      - name: Build, tag, and push Docker image
+        run: |
+          docker build --platform linux/amd64 -t inngest-event-manager .
+          docker tag inngest-event-manager:latest 944727373196.dkr.ecr.eu-west-2.amazonaws.com/inngest:latest
+          docker push 944727373196.dkr.ecr.eu-west-2.amazonaws.com/inngest:latest
+
+      # Update Lambda function with the new image
+      - name: Update Lambda function with new image
+        run: |
+          aws lambda update-function-code \
+            --function-name inngest \
+            --image-uri 944727373196.dkr.ecr.eu-west-2.amazonaws.com/inngest:latest
