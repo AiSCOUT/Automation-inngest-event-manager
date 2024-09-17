@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
-Description: Infra for aiscout-event-router.
+Description: Infra for aiscout-automation-event-router.
 
 Parameters:
   Env:
@@ -30,11 +30,11 @@ Parameters:
 
 
 Resources:
-  AiscoutEventRouter:
+  AiscoutAutomationEventRouter:
     Type: AWS::Serverless::Function
     Properties:
       PackageType: Image
-      FunctionName: aiscout-event-router
+      FunctionName: aiscout-automation-event-router
       Role: !Ref AwsRoleArn
       Timeout: 300
       MemorySize: 512
