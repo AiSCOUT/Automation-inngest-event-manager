@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
-Description: Infra for aiscout_skeleton_writer.
+Description: Infra for aiscout-event-router.
 
 Parameters:
   Env:
@@ -30,11 +30,11 @@ Parameters:
 
 
 Resources:
-  AiscoutSkeletonOverlay:
+  AiscoutEventRouter:
     Type: AWS::Serverless::Function
     Properties:
       PackageType: Image
-      FunctionName: aiscout-skeleton-overlay
+      FunctionName: aiscout-event-router
       Role: !Ref AwsRoleArn
       Timeout: 300
       MemorySize: 512
