@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Infra for aiscout-event-router.
+
+Parameters:
+  Env:
+    Type: String
+    Description: The deployment environment
+    Default: ""
+  SlackUrl:
+    Type: String
+    Description: The Slack webhook URL
+    Default: ""
+  SoftwareVersion:
+    Type: String
+    Description: The software version
+    Default: "v0.dirty.0"
+  ElasticUrl:
+    Type: String
+    Description: The Elastic URL
+    Default: ""
+  ElasticApiKey:
+    Type: String
+    Description: The Elastic API key
+    Default: ""
+  AwsRoleArn:
+    Type: String
+    Description: The ARN of the role to assume
+    Default: ""
+
+
+Resources:
+  AiscoutEventRouter:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      FunctionName: aiscout-event-router
+      Role: !Ref AwsRoleArn
+      Timeout: 300
+      MemorySize: 512
+      Environment:
+        Variables:
+          SOFTWARE_VERSION: !Ref SoftwareVersion
+          ELASTIC_CLOUD_ID: !Ref ElasticUrl
+          ELASTIC_API_KEY: !Ref ElasticApiKey
+          ENVIRONMENT: !Ref Env
+          SLACK_URL: !Ref SlackUrl
+    Metadata:
+      DockerTag: !Ref SoftwareVersion
+      DockerContext: ./
+      Dockerfile: ./Dockerfile
