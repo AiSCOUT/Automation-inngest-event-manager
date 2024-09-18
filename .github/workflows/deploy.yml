@@ -98,5 +98,5 @@ jobs:
       - name: Get the Lambda Function URL from CloudFormation Outputs
         run: |
           FUNCTION_URL=$(aws cloudformation describe-stacks --stack-name ${{ secrets.STACK_NAME }} \
-          --query "Stacks[0].Outputs[?OutputKey=='AiscoutAutomationFunctionUrl'].OutputValue" --output text)
+          --query "Stacks[0].Outputs[?OutputKey=='FunctionUrl'].OutputValue" --output text)
           echo "Lambda Function URL: $FUNCTION_URL"
