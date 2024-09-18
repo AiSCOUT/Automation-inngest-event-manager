@@ -27,11 +27,11 @@ Parameters:
     Type: String
     Description: The ARN of the role to assume
     Default: ""
-  InnestEventKey:
+  InngestEventKey:
     Type: String
     Description: The Inngest event key
     Default: ""
-  InnestSigningKey:
+  InngestSigningKey:
     Type: String
     Description: The Inngest signing key
     Default: ""
@@ -53,8 +53,8 @@ Resources:
           ELASTIC_API_KEY: !Ref ElasticApiKey
           ENVIRONMENT: !Ref Env
           SLACK_URL: !Ref SlackUrl
-          INNGEST_EVENT_KEY: !Ref InnestEventKey
-          INNGEST_SIGNING_KEY: !Ref InnestSigningKey
+          INNGEST_EVENT_KEY: !Ref InngestEventKey
+          INNGEST_SIGNING_KEY: !Ref InngestSigningKey
       FunctionUrlConfig:
         AuthType: NONE
     Metadata:
