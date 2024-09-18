@@ -63,8 +63,8 @@ Resources:
       AuthType: NONE
 
 Outputs:
-  AiscoutAutomationFunctionUrl:
+  FunctionUrl:
     Description: "The URL of the Lambda Function"
-    Value: !GetAtt AiscoutAutomationEventRouter.FunctionUrl
+    Value: !GetAtt AiscoutAutomationEventRouterUrl.FunctionUrl
     Export:
-      Name: AiscoutAutomationFunctionUrl
+      Name: FunctionUrl
