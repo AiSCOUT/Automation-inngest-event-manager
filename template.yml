@@ -55,14 +55,15 @@ Resources:
           SLACK_URL: !Ref SlackUrl
           INNGEST_EVENT_KEY: !Ref InnestEventKey
           INNGEST_SIGNING_KEY: !Ref InnestSigningKey
+      FunctionUrlConfig:
+        AuthType: NONE
     Metadata:
       DockerTag: !Ref SoftwareVersion
       DockerContext: ./
       Dockerfile: ./Dockerfile
-    FunctionUrlConfig:
-      AuthType: NONE
+
 
 Outputs:
   FunctionUrl:
     Description: "The URL of the Lambda Function"
-    Value: !GetAtt AiscoutAutomationEventRouter.FunctionUrl
+    Value: !GetAtt AiscoutAutomationEventRouterUrl.FunctionUrl
