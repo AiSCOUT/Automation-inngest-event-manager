@@ -66,5 +66,3 @@ Outputs:
   FunctionUrl:
     Description: "The URL of the Lambda Function"
     Value: !GetAtt AiscoutAutomationEventRouterUrl.FunctionUrl
-    Export:
-      Name: FunctionUrl
