@@ -65,4 +65,4 @@ Resources:
 Outputs:
   FunctionUrl:
     Description: "The URL of the Lambda Function"
-    Value: !GetAtt AiscoutAutomationEventRouterUrl.FunctionUrl
+    Value: !GetAtt AiscoutAutomationEventRouter.FunctionUrl
