@@ -5,7 +5,7 @@ import AWS from 'aws-sdk'; // Import the AWS SDK
 // Create a new AWS Lambda client
 const lambda = new AWS.Lambda();
 
-const inngest = new Inngest({ id: "automation" });
+const inngest = new Inngest({ id: "automation" , isDev: false});
 
 const workflowStart = inngest.createFunction(
   { id: "workflow-start" },

@@ -94,9 +94,3 @@ jobs:
             AwsRoleArn=arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/${{ secrets.IAM_ROLE_NAME }} \
             InngestEventKey=${{ env.INNGEST_EVENT_KEY }} \
             InngestSigningKey=${{ env.INNGEST_SIGNING_KEY }}
-
-      - name: Get the Lambda Function URL from CloudFormation Outputs
-        run: |
-          FUNCTION_URL=$(aws cloudformation describe-stacks --stack-name ${{ secrets.STACK_NAME }} \
-          --query "Stacks[0].Outputs[?OutputKey=='FunctionUrl'].OutputValue" --output text)
-          echo "Lambda Function URL: $FUNCTION_URL"
