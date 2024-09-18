@@ -27,6 +27,14 @@ Parameters:
     Type: String
     Description: The ARN of the role to assume
     Default: ""
+  InnestEventKey:
+    Type: String
+    Description: The Inngest event key
+    Default: ""
+  InnestSigningKey:
+    Type: String
+    Description: The Inngest signing key
+    Default: ""
 
 
 Resources:
@@ -45,7 +53,11 @@ Resources:
           ELASTIC_API_KEY: !Ref ElasticApiKey
           ENVIRONMENT: !Ref Env
           SLACK_URL: !Ref SlackUrl
+          INNGEST_EVENT_KEY: !Ref InnestEventKey
+          INNGEST_SIGNING_KEY: !Ref InnestSigningKey
     Metadata:
       DockerTag: !Ref SoftwareVersion
       DockerContext: ./
       Dockerfile: ./Dockerfile
+    FunctionUrlConfig:
+      AuthType: NONE
