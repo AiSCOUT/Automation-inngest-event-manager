@@ -94,7 +94,7 @@ jobs:
             AwsRoleArn=arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/${{ secrets.IAM_ROLE_NAME }} \
             InngestEventKey=${{ env.INNGEST_EVENT_KEY }} \
             InngestSigningKey=${{ env.INNGEST_SIGNING_KEY }} \
-          --no-progress --query 'Stacks[0].Outputs[?OutputKey==`AiscoutAutomationFunctionUrl`].OutputValue' --output text
+          --no-progressbar --query 'Stacks[0].Outputs[?OutputKey==`AiscoutAutomationFunctionUrl`].OutputValue' --output text
 
       - name: Log the Lambda Function URL
         run: |
