@@ -61,3 +61,10 @@ Resources:
       Dockerfile: ./Dockerfile
     FunctionUrlConfig:
       AuthType: NONE
+
+Outputs:
+  AiscoutAutomationFunctionUrl:
+    Description: "The URL of the Lambda Function"
+    Value: !GetAtt AiscoutAutomationEventRouter.FunctionUrl
+    Export:
+      Name: AiscoutAutomationFunctionUrl

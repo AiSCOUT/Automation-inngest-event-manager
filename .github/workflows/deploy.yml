@@ -93,9 +93,9 @@ jobs:
             ElasticApiKey=${{ secrets.ELASTIC_API_KEY }} \
             AwsRoleArn=arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/${{ secrets.IAM_ROLE_NAME }} \
             InngestEventKey=${{ env.INNGEST_EVENT_KEY }} \
-            InngestSigningKey=${{ env.INNGEST_SIGNING_KEY }}
+            InngestSigningKey=${{ env.INNGEST_SIGNING_KEY }} \
+          --no-progress --query 'Stacks[0].Outputs[?OutputKey==`AiscoutAutomationFunctionUrl`].OutputValue' --output text
 
-      - name: Retrieve and log the Lambda Function URL
+      - name: Log the Lambda Function URL
         run: |
-          FUNCTION_URL=$(aws lambda get-function-url-config --function-name aiscout-automation-event-router --query 'FunctionUrl' --output text)
-          echo "Lambda Function URL: $FUNCTION_URL"
+          echo "Lambda Function URL: ${{ steps.deploy.outputs.functionUrl }}"
