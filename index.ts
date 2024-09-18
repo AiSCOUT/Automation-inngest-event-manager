@@ -1,68 +1,44 @@
 import { Inngest } from "inngest";
 import { serve } from "inngest/lambda";
+import AWS from 'aws-sdk'; // Import the AWS SDK
 
-const inngest = new Inngest({ id: "inngest-drill-automation" });
+// Create a new AWS Lambda client
+const lambda = new AWS.Lambda();
 
-const processDrillData = inngest.createFunction(
-  { name: "Process Drill Data", id: "process-drill-data" },
-  { event: "drill/process.data" },
+const inngest = new Inngest({ id: "automation" });
+
+const workflowStart = inngest.createFunction(
+  { id: "workflow-start" },
+  { event: "automation/workflow.start" },
   async ({ event, step }) => {
     try {
       // Log that the function was triggered
       console.log("Function 'processDrillData' triggered.");
       console.log("Event data received:", JSON.stringify(event));
 
-      // Destructure the input data from the event
-      const {
-        workflow_id,
-        drill_id,
-        drill_name,
-        trial_details,
-        input_video_path,
-        output_video_path,
-        csv_files,
-        expected_metrics,
-        player_info,
-        sensitive,
-      } = event.data;
+      // // Extract the Lambda ID from the event object
+      // const { lambdaID, payload } = event; // Assuming the event contains lambdaID and payload keys
 
-      // Log the received data for debugging
-      console.log("Processing Workflow ID:", workflow_id);
-      console.log("Processing Drill ID:", drill_id);
-      console.log("Trial Details:", trial_details);
-      console.log("Input Video Path:", input_video_path);
-      console.log("CSV Files:", csv_files);
-      console.log("Expected Metrics:", expected_metrics);
-      console.log("Player Info:", player_info);
+      // if (!lambdaID) {
+      //   throw new Error("No lambdaID found in event");
+      // }
 
-      // Simulate some processing with sleep
-      await step.sleep("processing-delay", "2s");
+      // // Prepare the parameters to invoke another Lambda function
+      // const params = {
+      //   FunctionName: lambdaID, // The ID or ARN of the Lambda function to invoke
+      //   InvocationType: "Event", // Event type for asynchronous execution
+      //   Payload: JSON.stringify(payload || {}), // The payload to pass to the triggered Lambda
+      // };
 
-      // Example: Generate mock metrics based on input
-      const metrics = expected_metrics.map((metric: string) => ({
-        name: metric,
-        value: Math.random().toFixed(2), // Simulate metric value generation
-      }));
+      // // Invoke the Lambda function using AWS SDK
+      // const result = await lambda.invoke(params).promise();
 
-      // Example: Generate mock scores
-      const scores = [
-        { name: "Player Skill", value: Math.floor(Math.random() * 100) },  // Simulate skill score
-        { name: "Player Fitness", value: Math.floor(Math.random() * 100) } // Simulate fitness score
-      ];
+      // console.log(`Lambda function '${lambdaID}' invoked successfully`, result);
 
-      // Prepare the output
-      const output = {
-        workflow_id,
-        video_path: output_video_path || input_video_path, // Default to input video path if output is not provided
-        metrics: JSON.stringify(metrics), // JSON string representation of metrics
-        scores: JSON.stringify(scores) // JSON string representation of scores
-      };
-
-      // Log output for debugging
-      console.log("Generated Output for Workflow:", JSON.stringify(output, null, 2));
-
-      // Return the final output
-      return output;
+      // // Return the final output
+      // return { status: "success", result, event };
+      await step.sleep("wait-for-a-sec", "1s");
+      return "Hello World";
     } catch (err) {
       console.error("Error processing drill data:", err);
       throw err; // Rethrow the error so it gets logged
@@ -74,5 +50,5 @@ const processDrillData = inngest.createFunction(
 console.log("Starting Inngest handler...");
 export const handler = serve({
   client: inngest,
-  functions: [processDrillData],
+  functions: [workflowStart], //we can add event handlers for each drill, or use one for all
 });

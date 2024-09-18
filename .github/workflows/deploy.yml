@@ -53,7 +53,20 @@ jobs:
             echo "AWS_REGION=us-east-1" >> $GITHUB_ENV
             echo "AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}" >> $GITHUB_ENV
           fi
-      
+
+      - name: Set Inngest Credentials
+        id: inngest_creds
+        run: |
+          if [[ "${{ github.ref_name }}" == 'production' ]]; then
+            echo "INNGEST_EVENT_KEY=${{ secrets.INNGEST_EVENT_KEY_PRODUCTION }}" >> $GITHUB_ENV
+            echo "INNGEST_SIGNING_KEY=${{ secrets.INNGEST_SIGNING_KEY_PRODUCTION }}" >> $GITHUB_ENV
+          elif [[ "${{ github.ref_name }}" == 'staging' ]]; then
+            echo "INNGEST_EVENT_KEY=${{ secrets.INNGEST_EVENT_KEY_STAGING }}" >> $GITHUB_ENV
+            echo "INNGEST_SIGNING_KEY=${{ secrets.INNGEST_SIGNING_KEY_STAGING }}" >> $GITHUB_ENV
+          else
+            echo "INNGEST_EVENT_KEY=${{ secrets.INNGEST_EVENT_KEY_DEVELOPMENT }}" >> $GITHUB_ENV
+            echo "INNGEST_SIGNING_KEY=${{ secrets.INNGEST_SIGNING_KEY_DEVELOPMENT }}" >> $GITHUB_ENV
+          fi
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -79,3 +92,11 @@ jobs:
             ElasticUrl=${{ secrets.ELASTIC_CLOUD_ID }} \
             ElasticApiKey=${{ secrets.ELASTIC_API_KEY }} \
             AwsRoleArn=arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/${{ secrets.IAM_ROLE_NAME }} \
+            InngestEventKey=${{ env.INNGEST_EVENT_KEY }} \
+            InngestSigningKey=${{ env.INNGEST_SIGNING_KEY }}
+
+      - name: Retrieve and log the Lambda Function URL
+        run: |
+          FUNCTION_NAME=$(aws cloudformation describe-stack-resource --stack-name ${{ secrets.STACK_NAME }} --logical-resource-id AiscoutAutomationEventRouter --query 'StackResourceDetail.PhysicalResourceId' --output text)
+          FUNCTION_URL=$(aws lambda get-function-url-config --function-name $FUNCTION_NAME --query 'FunctionUrl' --output text)
+          echo "Lambda Function URL: $FUNCTION_URL"
