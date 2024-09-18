@@ -93,9 +93,10 @@ jobs:
             ElasticApiKey=${{ secrets.ELASTIC_API_KEY }} \
             AwsRoleArn=arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/${{ secrets.IAM_ROLE_NAME }} \
             InngestEventKey=${{ env.INNGEST_EVENT_KEY }} \
-            InngestSigningKey=${{ env.INNGEST_SIGNING_KEY }} \
-          --no-progressbar --query 'Stacks[0].Outputs[?OutputKey==`AiscoutAutomationFunctionUrl`].OutputValue' --output text
+            InngestSigningKey=${{ env.INNGEST_SIGNING_KEY }}
 
-      - name: Log the Lambda Function URL
+      - name: Get the Lambda Function URL from CloudFormation Outputs
         run: |
-          echo "Lambda Function URL: ${{ steps.deploy.outputs.functionUrl }}"
+          FUNCTION_URL=$(aws cloudformation describe-stacks --stack-name ${{ secrets.STACK_NAME }} \
+          --query "Stacks[0].Outputs[?OutputKey=='AiscoutAutomationFunctionUrl'].OutputValue" --output text)
+          echo "Lambda Function URL: $FUNCTION_URL"
