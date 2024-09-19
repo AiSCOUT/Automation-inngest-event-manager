@@ -2,7 +2,6 @@ import { Inngest } from "inngest";
 import { serve } from "inngest/lambda";
 import AWS from 'aws-sdk'; // Import the AWS SDK
 
-// Create a new AWS Lambda client
 const lambda = new AWS.Lambda();
 
 const inngest = new Inngest({ id: "automation" , isDev: false});
@@ -16,37 +15,48 @@ const workflowStart = inngest.createFunction(
       console.log("Function 'processDrillData' triggered.");
       console.log("Event data received:", JSON.stringify(event));
 
-      // // Extract the Lambda ID from the event object
-      // const { lambdaID, payload } = event; // Assuming the event contains lambdaID and payload keys
+      // Build a drill config dict
+      let drill_config = {};
+      if (event.data.drill === "aiscout-drill-pressups-knees") {
+        drill_config = { knees: true };
+      } else if (event.data.drill === "aiscout-drill-pressups-knees-15s") {
+        drill_config = { knees: false, time_limit: 15 };
+      } else if (event.data.drill === "aiscout-drill-pressups-15s") {
+        drill_config = { time_limit: 15 };
+      } else if (event.data.drill === "aiscout-drill-5-0-5-sprint-left") {
+        drill_config = { turn_direction: "left" };
+      } else if (event.data.drill === "aiscout-drill-5-0-5-sprint-right") {
+        drill_config = { turn_direction: "right" };
+      }
+      
+      // Add/overwrite drill config on the event data
+      event.data.drill_config = drill_config;
 
-      // if (!lambdaID) {
-      //   throw new Error("No lambdaID found in event");
-      // }
+      // Prepare the parameters to invoke another Lambda function
+      const params = {
+        FunctionName: "aiscout-skeleton-overlay",
+        InvocationType: "Event", // Asynchronous execution
+        Payload: JSON.stringify(event.data || {}), 
+      };
 
-      // // Prepare the parameters to invoke another Lambda function
-      // const params = {
-      //   FunctionName: lambdaID, // The ID or ARN of the Lambda function to invoke
-      //   InvocationType: "Event", // Event type for asynchronous execution
-      //   Payload: JSON.stringify(payload || {}), // The payload to pass to the triggered Lambda
-      // };
+      // Invoke the Lambda function asynchronously
+      lambda.invoke(params).promise()
+        .catch((err) => {
+          // Log any errors that occur during invocation, but do not block the execution
+          console.error("Error invoking Lambda:", err);
+        });
 
-      // // Invoke the Lambda function using AWS SDK
-      // const result = await lambda.invoke(params).promise();
+      // Continue execution
+      console.log(`Lambda function '${event.data.drill}' invoked asynchronously.`);
 
-      // console.log(`Lambda function '${lambdaID}' invoked successfully`, result);
-
-      // // Return the final output
-      // return { status: "success", result, event };
-      await step.sleep("wait-for-a-sec", "1s");
-      return "Hello World";
+      return { "event": event, "step": step, "drill": event.data.drill };
     } catch (err) {
       console.error("Error processing drill data:", err);
-      throw err; // Rethrow the error so it gets logged
+      throw err;
     }
   }
 );
 
-// Log that the Inngest handler is starting
 console.log("Starting Inngest handler...");
 export const handler = serve({
   client: inngest,
