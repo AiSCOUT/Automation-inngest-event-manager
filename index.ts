@@ -34,7 +34,7 @@ const workflowStart = inngest.createFunction(
       event.data.drill_config = drill_config;
 
       // Prepare the parameters to invoke another Lambda function
-      const params = {
+      let params = {
         FunctionName: "aiscout-skeleton-overlay",
         InvocationType: "Event", // Asynchronous execution
         Payload: JSON.stringify(event.data || {}), 
