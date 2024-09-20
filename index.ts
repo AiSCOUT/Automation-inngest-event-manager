@@ -6,6 +6,7 @@ const lambda = new AWS.Lambda();
 
 const inngest = new Inngest({ id: "automation" , isDev: false});
 
+
 const workflowStart = inngest.createFunction(
   { id: "workflow-start" },
   { event: "automation/workflow.start" },
@@ -38,16 +39,23 @@ const workflowStart = inngest.createFunction(
         InvocationType: "Event", // Asynchronous execution
         Payload: JSON.stringify(event.data || {}), 
       };
+      if (!event.data.async) {
+        params.InvocationType = "RequestResponse"; // Synchronous execution
+        const result = await lambda.invoke(params).promise();
+        console.log("Lambda function invoked synchronously:", result);
+      } else {
 
-      // Invoke the Lambda function asynchronously
-      lambda.invoke(params).promise()
-        .catch((err) => {
-          // Log any errors that occur during invocation, but do not block the execution
-          console.error("Error invoking Lambda:", err);
-        });
+
+        // Invoke the Lambda function asynchronously
+        lambda.invoke(params).promise()
+          .catch((err) => {
+            // Log any errors that occur during invocation, but do not block the execution
+            console.error("Error invoking Lambda:", err);
+          });
+      }
 
       // Continue execution
-      console.log(`Lambda function '${event.data.drill}' invoked asynchronously.`);
+      console.log(`Lambda function invoked asynchronously.`);
 
       return { "event": event, "step": step, "drill": event.data.drill };
     } catch (err) {
