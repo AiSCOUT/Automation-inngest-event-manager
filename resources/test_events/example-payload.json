@@ -1,0 +1,36 @@
+{
+  "name": "automation/workflow.start",
+  "data": {
+      "workflow_id": "test_0000",
+      "drill_id": "aiscout-drill-pressups",
+      "player_id": "test_0000",
+      "video_location": "s3://aiscout-automation-us-east-1/validation/Pressups-FIFA-Study/469526/original.mp4",
+      "csv_files": ["s3://aiscout-automation-us-east-1/validation/Pressups-FIFA-Study/469526/cam_1_overlay.csv"],
+      "drill_config":{},
+      "fps": 30,
+      "width": 1920,
+      "height": 1080,
+      "frames": 100,
+      "trial_details": {
+          "club_name":"Chelsea",
+          "club_id":"test_2",
+          "trial_name": "test_trial_2",
+          "trial_id": "test_2"
+      },
+      "sensitive": {
+          "player_info": {
+              "email": "test_email@test.com",
+              "age": 18, 
+              "gender": "male",
+              "strong_foot": "right",
+              "position": "striker",
+              "height": 1.8, 
+              "weight": 70,
+              "coords": { 
+                      "lat": 23.90158,
+                      "long": 80.83960
+                  }
+          }  
+      }
+    }
+}

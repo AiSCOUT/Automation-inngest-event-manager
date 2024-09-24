@@ -1,0 +1,89 @@
+name: Build and Deploy SAM Application
+
+on:
+  push:
+    branches:
+      - production
+      - staging
+      - development  # Trigger deployment on push to the specified branches
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch all history to get the latest tags
+
+      - name: Set up Node 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install AWS SAM CLI
+        run: |
+          pip install aws-sam-cli
+
+      - name: Get latest tag
+        id: get_tag
+        run: echo "tag=$(git tag | grep -v '\-rc$' | sort -r | head -n 1)" >> $GITHUB_OUTPUT
+
+      - name: Get software version
+        run: |
+          echo "SOFTWARE_VERSION=${{ steps.get_tag.outputs.tag || 'v0.dirty.0' }}" >> $GITHUB_ENV
+
+      - name: Set AWS Credentials, Region and Inngest Credentials
+        id: set_creds
+        run: |
+          if [[ "${{ github.ref_name }}" == 'production' ]]; then
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID_PRODUCTION }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY_PRODUCTION }}" >> $GITHUB_ENV
+            echo "AWS_REGION=us-east-1" >> $GITHUB_ENV
+            echo "AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}" >> $GITHUB_ENV
+            echo "INNGEST_EVENT_KEY=${{ secrets.INNGEST_EVENT_KEY_PRODUCTION }}" >> $GITHUB_ENV
+            echo "INNGEST_SIGNING_KEY=${{ secrets.INNGEST_SIGNING_KEY_PRODUCTION }}" >> $GITHUB_ENV
+          elif [[ "${{ github.ref_name }}" == 'staging' ]]; then
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID_STAGING }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY_STAGING }}" >> $GITHUB_ENV
+            echo "AWS_REGION=us-east-1" >> $GITHUB_ENV
+            echo "AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID_STAGING }}" >> $GITHUB_ENV
+            echo "INNGEST_EVENT_KEY=${{ secrets.INNGEST_EVENT_KEY_STAGING }}" >> $GITHUB_ENV
+            echo "INNGEST_SIGNING_KEY=${{ secrets.INNGEST_SIGNING_KEY_STAGING }}" >> $GITHUB_ENV
+          else
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID_DEVELOPMENT }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY_DEVELOPMENT }}" >> $GITHUB_ENV
+            echo "AWS_REGION=us-east-1" >> $GITHUB_ENV
+            echo "AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}" >> $GITHUB_ENV
+            echo "INNGEST_EVENT_KEY=${{ secrets.INNGEST_EVENT_KEY_DEVELOPMENT }}" >> $GITHUB_ENV
+            echo "INNGEST_SIGNING_KEY=${{ secrets.INNGEST_SIGNING_KEY_DEVELOPMENT }}" >> $GITHUB_ENV
+          fi
+
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Build the SAM application
+        run: |
+          sam build --use-container --parameter-overrides \
+            GithubToken=${{ secrets.MY_GITHUB_TOKEN }} \
+
+      - name: Deploy the SAM application
+        run: |
+          sam deploy --no-confirm-changeset --no-fail-on-empty-changeset \
+          --image-repository ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }} \
+          --stack-name ${{ secrets.STACK_NAME }} --capabilities CAPABILITY_IAM \
+          --parameter-overrides \
+            Env=${{ github.ref_name }} \
+            SlackUrl=${{ secrets.SLACK_URL }} \
+            SoftwareVersion=${{ env.SOFTWARE_VERSION }} \
+            ElasticUrl=${{ secrets.ELASTIC_CLOUD_ID }} \
+            ElasticApiKey=${{ secrets.ELASTIC_API_KEY }} \
+            AwsRoleArn=arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/${{ secrets.IAM_ROLE_NAME }} \
+            InngestEventKey=${{ env.INNGEST_EVENT_KEY }} \
+            InngestSigningKey=${{ env.INNGEST_SIGNING_KEY }}
