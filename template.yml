@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Infra for aiscout-automation-event-router.
+
+Parameters:
+  Env:
+    Type: String
+    Description: The deployment environment
+    Default: ""
+  SlackUrl:
+    Type: String
+    Description: The Slack webhook URL
+    Default: ""
+  SoftwareVersion:
+    Type: String
+    Description: The software version
+    Default: "v0.dirty.0"
+  ElasticUrl:
+    Type: String
+    Description: The Elastic URL
+    Default: ""
+  ElasticApiKey:
+    Type: String
+    Description: The Elastic API key
+    Default: ""
+  AwsRoleArn:
+    Type: String
+    Description: The ARN of the role to assume
+    Default: ""
+  InngestEventKey:
+    Type: String
+    Description: The Inngest event key
+    Default: ""
+  InngestSigningKey:
+    Type: String
+    Description: The Inngest signing key
+    Default: ""
+
+
+Resources:
+  AiscoutAutomationEventRouter:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      FunctionName: aiscout-automation-event-router
+      Role: !Ref AwsRoleArn
+      Timeout: 300
+      MemorySize: 512
+      Environment:
+        Variables:
+          SOFTWARE_VERSION: !Ref SoftwareVersion
+          ELASTIC_CLOUD_ID: !Ref ElasticUrl
+          ELASTIC_API_KEY: !Ref ElasticApiKey
+          ENVIRONMENT: !Ref Env
+          SLACK_URL: !Ref SlackUrl
+          INNGEST_EVENT_KEY: !Ref InngestEventKey
+          INNGEST_SIGNING_KEY: !Ref InngestSigningKey
+      FunctionUrlConfig:
+        AuthType: NONE
+    Metadata:
+      DockerTag: !Ref SoftwareVersion
+      DockerContext: ./
+      Dockerfile: ./Dockerfile
+
+
+Outputs:
+  FunctionUrl:
+    Description: "The URL of the Lambda Function"
+    Value: !GetAtt AiscoutAutomationEventRouterUrl.FunctionUrl
